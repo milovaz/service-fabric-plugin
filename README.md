@@ -12,7 +12,7 @@ To manually install the plugin:
    ```
 2. Open your Jenkins dashboard, go to Manage Jenkins -> Manage Plugins.
 3. Go to Advanced tab, under Upload Plugin section, click Choose File.
-4. Select `azure-service-fabric.hpi` in `target` folder of your repo, click Upload.
+4. Select `service-fabric.hpi` in `target` folder of your repo, click Upload.
 5. Restart your Jenkins instance after installation is completed.
 
 ## Usage
