@@ -20,7 +20,7 @@
   </parent>
   <groupId>org.jenkinsci.plugins</groupId>
   <artifactId>service-fabric</artifactId>
-  <version>1.0</version>
+  <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>Service Fabric Plugin</name>
