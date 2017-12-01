@@ -55,8 +55,6 @@ public class ServiceFabricPublisher extends Recorder {
     private final String clientKey;
     private final String clientCert;
     
-    public String appUpgradeCheck;
-    public String deployType;
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor

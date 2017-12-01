@@ -134,16 +134,16 @@ public class SFCommandBuilder {
         try {
             builder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
-            logger.log(Level.SEVERE, "ParserConfigurationException:" + e.getStackTrace());
+            logger.log(Level.SEVERE, "ParserConfigurationException:" + e);
             throw new RuntimeException(e.getMessage());
         }
         try {
             applicationManifest = builder.parse(new File(newFilePath));
         } catch (SAXException e) {
-            logger.log(Level.SEVERE, "SAXException:" + e.getStackTrace());
+            logger.log(Level.SEVERE, "SAXException:" + e);
             throw new RuntimeException(e.getMessage());
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "IOException:" + e.getStackTrace());
+            logger.log(Level.SEVERE, "IOException:" + e);
             throw new RuntimeException(e.getMessage());
         }
         targetVersion = applicationManifest.getDocumentElement().getAttribute("ApplicationTypeVersion");
