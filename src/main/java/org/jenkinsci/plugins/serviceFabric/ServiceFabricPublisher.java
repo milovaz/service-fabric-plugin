@@ -33,7 +33,7 @@ import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilde
  * <p/>
  * When the user configures the project and enables this publisher,
  * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
- * and a new {@link ServiabcnopstceFabricPublisher} is created. The created
+ * and a new {@link ServiceFabricPublisher} is created. The created
  * instance is persisted to the project configuration XML by using
  * XStream, so this allows you to use instance fields (like {@link #name})
  * to remember the configuration.
