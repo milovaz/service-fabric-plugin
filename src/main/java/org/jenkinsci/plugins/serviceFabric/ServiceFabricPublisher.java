@@ -29,16 +29,12 @@ import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilde
 
 /**
  * Sample {@link Publisher}.
- * <p/>
- * <p/>
  * When the user configures the project and enables this publisher,
  * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
  * and a new {@link ServiceFabricPublisher} is created. The created
  * instance is persisted to the project configuration XML by using
  * XStream, so this allows you to use instance fields (like {@link #name})
  * to remember the configuration.
- * <p/>
- * <p/>
  * When a build is performed and is complete, the {@link #perform(AbstractBuild, Launcher, BuildListener)}
  * method will be invoked.
  *
@@ -175,8 +171,6 @@ public class ServiceFabricPublisher extends Recorder {
     /**
      * Descriptor for {@link ServiceFabricPublisher}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
-     * <p/>
-     * <p/>
      * See <tt>src/main/resources/org/jenkinsci/plugins/serviceFabric/ServiceFabricPublisher/*.jelly</tt>
      * for the actual HTML fragment for the configuration screen.
      */
@@ -188,7 +182,6 @@ public class ServiceFabricPublisher extends Recorder {
          *
          * @param value This parameter receives the value that the user has typed.
          * @return Indicates the outcome of the validation. This is sent to the browser.
-         * <p/>
          * Note that returning {@link FormValidation#error(String)} does not
          * prevent the form from being saved. It just means that a message
          * will be displayed to the user.
