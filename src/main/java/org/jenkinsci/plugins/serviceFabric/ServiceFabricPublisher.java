@@ -24,7 +24,6 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.lang.Throwable;
 
 import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilder;
 
