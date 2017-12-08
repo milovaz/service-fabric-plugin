@@ -24,6 +24,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
+import java.lang.Throwable;
 
 import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilder;
 
@@ -135,7 +136,7 @@ public class ServiceFabricPublisher extends Recorder {
     // }
 
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener){
 
 
         // use the parameters to construct the commands
@@ -143,9 +144,14 @@ public class ServiceFabricPublisher extends Recorder {
         String commandString = commandBuilder.buildCommands(); 
 
         Shell command = new Shell(commandString);
-
+        
         try{
-            command.perform(build, launcher, listener);
+            boolean status = command.perform(build, launcher, listener);
+            
+            if (status == false)
+            {
+            	return false;
+            }
         }catch(InterruptedException e){
             return false;
         }
