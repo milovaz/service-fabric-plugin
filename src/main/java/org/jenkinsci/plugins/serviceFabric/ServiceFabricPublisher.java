@@ -147,9 +147,8 @@ public class ServiceFabricPublisher extends Recorder {
         try{
             boolean status = command.perform(build, launcher, listener);
             
-            if (status == false)
-            {
-            	return false;
+            if (status == false){
+           	    return false;
             }
         }catch(InterruptedException e){
             return false;
