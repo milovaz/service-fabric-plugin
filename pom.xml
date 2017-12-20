@@ -23,8 +23,8 @@
   <version>1.1-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
-  <name>Service Fabric Plugin</name>
-  <description>Plugin for deploying service fabric applications.</description>
+  <name>Azure Service Fabric Plugin</name>
+  <description>Plugin for deploying Azure Service Fabric applications.</description>
   <url>https://wiki.jenkins.io/display/JENKINS/Service+Fabric+Plugin</url>
   <licenses>
     <license>
