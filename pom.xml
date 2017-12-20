@@ -24,7 +24,7 @@
   <packaging>hpi</packaging>
 
   <name>Azure Service Fabric Plugin</name>
-  <description>Plugin for deploying service fabric applications on azure or on premises or other public clouds.</description>
+  <description>Plugin for deploying Azure Service Fabric applications.</description>
   <url>https://wiki.jenkins.io/display/JENKINS/Service+Fabric+Plugin</url>
   <licenses>
     <license>
