@@ -12,9 +12,6 @@ package org.jenkinsci.plugins.serviceFabric;
 import hudson.model.AbstractBuild;
 import hudson.model.Action;
 
-/**
- * Created by prit8976 on 8/27/15.
- */
 public class ServiceFabricBuildAction implements Action {
 
     private String command;
@@ -47,8 +44,7 @@ public class ServiceFabricBuildAction implements Action {
         return build;
     }
 
-    ServiceFabricBuildAction(final String command, final AbstractBuild<?, ?> build)
-    {
+    ServiceFabricBuildAction(final String command, final AbstractBuild<?, ?> build) {
         this.command = command;
         this.build = build;
     }

@@ -9,28 +9,26 @@
  */
 package org.jenkinsci.plugins.serviceFabric;
 
-import hudson.Launcher;
 import hudson.Extension;
-import hudson.model.Action;
-import hudson.tasks.*;
-import hudson.util.FormValidation;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
 import hudson.model.AbstractProject;
-import net.sf.json.JSONObject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
+import hudson.tasks.Publisher;
+import hudson.tasks.Recorder;
+import hudson.tasks.Shell;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilder;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.servlet.ServletException;
-import java.io.IOException;
-
-import org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands.SFCommandBuilder;
-
 /**
- * Sample {@link Publisher}.
  * When the user configures the project and enables this publisher,
- * {@link DescriptorImpl#newInstance(StaplerRequest)} is invoked
+ * {@link DescriptorImpl#newInstance(org.kohsuke.stapler.StaplerRequest)} is invoked
  * and a new {@link ServiceFabricPublisher} is created. The created
  * instance is persisted to the project configuration XML by using
  * XStream, so this allows you to use instance fields (like {@link #name})
@@ -50,16 +48,16 @@ public class ServiceFabricPublisher extends Recorder {
     private final String manifestPath;
     private final String clientKey;
     private final String clientCert;
-    
+
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public ServiceFabricPublisher(String name, String clusterType, String clusterPublicIP, String applicationName,
-            String applicationType, String manifestPath, String clientKey, String clientCert) {
+                                  String applicationType, String manifestPath, String clientKey, String clientCert) {
 
         this.name = name;
         this.clusterType = clusterType;
-        this.clusterPublicIP = clusterPublicIP; 
+        this.clusterPublicIP = clusterPublicIP;
         this.applicationName = applicationName;
         this.applicationType = applicationType;
         this.manifestPath = manifestPath;
@@ -73,88 +71,59 @@ public class ServiceFabricPublisher extends Recorder {
     public String getName() {
         return name;
     }
-    
-    public String getClusterType()
-{        return clusterType;
+
+    public String getClusterType() {
+        return clusterType;
     }
-    
-    public String getClusterPublicIP(){
+
+    public String getClusterPublicIP() {
         return clusterPublicIP;
     }
-    
-    public String getApplicationName(){
+
+    public String getApplicationName() {
         return applicationName;
     }
-    
-    public String getApplicationType(){
+
+    public String getApplicationType() {
         return applicationType;
     }
 
-    public String getManifestPath(){
+    public String getManifestPath() {
         return manifestPath;
     }
 
-    public String getClientKey(){
+    public String getClientKey() {
         return clientKey;
     }
 
-    public String getClientCert(){
+    public String getClientCert() {
         return clientCert;
     }
-    
-    // public String getDeployType(){
-    //     return deployType;
-    // }
-    
-    // public String getAppUpgradeCheck(){
-    //     return appUpgradeCheck;
-    // }
-    
-    // public String isDeployType(String deployTypeName){
-        
-    //     if(deployTypeName != null && !deployTypeName.isEmpty()){
-    //         return this.deployType.equalsIgnoreCase(deployTypeName) ? "true" : "";
-    //     }
-        
-    //     else{
-    //         return "";
-    //     }
-    // }
-    
-    // public String isAppUpgradeCheck(String upgradeParams){
-        
-    //     if(upgradeParams != null && !upgradeParams.isEmpty()){
-    //         if (this.appUpgradeCheck != null){
-    //             return this.appUpgradeCheck.equalsIgnoreCase(upgradeParams) ? "true" : "";
-    //         }
-    //         else if(upgradeParams.equalsIgnoreCase("default"))
-    //             return "true";
-    //     }
-        
-    //     return "";
-    // }
 
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener){
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
 
         // use the parameters to construct the commands
-        SFCommandBuilder commandBuilder = new SFCommandBuilder(applicationName, applicationType, clusterPublicIP, manifestPath, clientKey, clientCert, build.getProject().getName());
-        String commandString = commandBuilder.buildCommands(); 
+        SFCommandBuilder commandBuilder = new SFCommandBuilder(
+                applicationName,
+                applicationType,
+                clusterPublicIP,
+                manifestPath,
+                clientKey,
+                clientCert,
+                build.getProject().getName());
+        String commandString = commandBuilder.buildCommands();
 
         Shell command = new Shell(commandString);
-        
-        try{
+
+        try {
             boolean status = command.perform(build, launcher, listener);
-            
-            if (status == false){
-           	    return false;
-            }
-        }catch(InterruptedException e){
+
+            return status;
+        } catch (InterruptedException e) {
             return false;
         }
-
-        return true;
     }
 
     @Override
@@ -180,28 +149,31 @@ public class ServiceFabricPublisher extends Recorder {
      */
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
+        public DescriptorImpl() {
+            super();
+            load();
+        }
 
         /**
-         * Performs on-the-fly validation of the form field 'name'.
-         *
-         * @param value This parameter receives the value that the user has typed.
-         * @return Indicates the outcome of the validation. This is sent to the browser.
-         * Note that returning {@link FormValidation#error(String)} does not
-         * prevent the form from being saved. It just means that a message
-         * will be displayed to the user.
+         * Check to make sure that the application name begins with "fabric:/".
          */
-        
-        // Check to make sure that the application name begins with "fabric:/"
-        public FormValidation doCheckApplicationName(@QueryParameter String value) 
-                throws IOException, ServletException {
-            if(value.startsWith("fabric:/"))
+        public FormValidation doCheckApplicationName(@QueryParameter String value) {
+            if (value.startsWith("fabric:/")) {
                 return FormValidation.ok();
-            else
+            } else {
                 return FormValidation.error("Application name must begin with \"fabric:/\"");
+            }
+        }
+
+        public ListBoxModel doFillClusterTypeItems() {
+            ListBoxModel model = new ListBoxModel();
+            model.add("Unsecured", "unsecured");
+            model.add("Secured", "secured");
+            return model;
         }
 
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
-            // Indicates that this builder can be used with all kinds of project types 
+            // Indicates that this builder can be used with all kinds of project types
             return true;
         }
 
@@ -211,15 +183,6 @@ public class ServiceFabricPublisher extends Recorder {
         public String getDisplayName() {
             return "Deploy Service Fabric Project";
         }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-            // To persist global configuration information,
-            // set that to properties and call save().
-            save();
-            return super.configure(req, formData);
-        }
-
     }
 }
 

@@ -9,12 +9,8 @@
  */
 package org.jenkinsci.plugins.serviceFabric;
 
-import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.Action;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by prit8976 on 8/27/15.
