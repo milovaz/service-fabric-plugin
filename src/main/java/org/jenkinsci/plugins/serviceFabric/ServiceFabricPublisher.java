@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.serviceFabric;
 
+import com.microsoft.jenkins.servicefabric.util.Constants;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -42,14 +43,16 @@ public class ServiceFabricPublisher {
      * Resolve to the updated instance during deserialization.
      */
     private Object readResolve() {
-        return new com.microsoft.jenkins.servicefabric.ServiceFabricPublisher(
-                clusterType,
-                clusterPublicIP,
-                applicationName,
-                applicationType,
-                manifestPath,
-                clientKey,
-                clientCert);
+        com.microsoft.jenkins.servicefabric.ServiceFabricPublisher sf =
+                new com.microsoft.jenkins.servicefabric.ServiceFabricPublisher();
+        sf.setConfigureType(Constants.CONFIGURE_TYPE_FILL);
+        sf.setClusterPublicIP(clusterPublicIP);
+        sf.setApplicationName(applicationName);
+        sf.setApplicationType(applicationType);
+        sf.setManifestPath(manifestPath);
+        sf.setClientKey(clientKey);
+        sf.setClientCert(clientCert);
+        return sf;
     }
 
     public String getName() {
