@@ -7,7 +7,7 @@
  * license information.
 
  */
-package org.jenkinsci.plugins.serviceFabric;
+package com.microsoft.jenkins.servicefabric;
 
 import hudson.model.AbstractBuild;
 import hudson.model.Action;

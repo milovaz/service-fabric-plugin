@@ -7,14 +7,11 @@
  * license information.
 
  */
-package org.jenkinsci.plugins.serviceFabric;
+package com.microsoft.jenkins.servicefabric;
 
 import hudson.model.AbstractProject;
 import hudson.model.Action;
 
-/**
- * Created by prit8976 on 8/27/15.
- */
 public class ServiceFabricProjectAction implements Action {
 
     private AbstractProject<?, ?> project;

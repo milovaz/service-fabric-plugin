@@ -7,7 +7,7 @@
  * license information.
 
  */
-package org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands;
+package com.microsoft.jenkins.servicefabric.command;
 
 import hudson.FilePath;
 import org.w3c.dom.Document;
