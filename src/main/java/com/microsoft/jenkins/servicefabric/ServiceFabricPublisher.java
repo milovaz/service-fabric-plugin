@@ -1,11 +1,7 @@
 /*
-
  * Copyright (c) Microsoft Corporation. All rights reserved.
-
  * Licensed under the MIT License. See LICENSE in the project root for
-
  * license information.
-
  */
 package com.microsoft.jenkins.servicefabric;
 
@@ -15,6 +11,7 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.resources.GenericResource;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.util.AzureBaseCredentials;
+import com.microsoft.jenkins.azurecommons.telemetry.AppInsightsUtils;
 import com.microsoft.jenkins.servicefabric.command.SFCommandBuilder;
 import com.microsoft.jenkins.servicefabric.util.AzureHelper;
 import com.microsoft.jenkins.servicefabric.util.Constants;
@@ -53,8 +50,6 @@ import java.net.URL;
  * to remember the configuration.
  * When a build is performed and is complete, the {@link #perform(AbstractBuild, Launcher, BuildListener)}
  * method will be invoked.
- *
- * @author Kohsuke Kawaguchi
  */
 public class ServiceFabricPublisher extends Recorder {
 
@@ -74,14 +69,39 @@ public class ServiceFabricPublisher extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) throws IOException {
-        String cfgType = getConfigureType();
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)
+            throws IOException, InterruptedException {
+        String buildId = AppInsightsUtils.hash(build == null ? null : build.getUrl());
+        AzureServiceFabricPlugin.sendEvent("StartDeploy",
+                Constants.AI_RUN, buildId);
 
+        try {
+            boolean result = doPerform(build, launcher, listener);
+            AzureServiceFabricPlugin.sendEvent(result ? "Deployed" : "DeployFailed",
+                    Constants.AI_RUN, buildId);
+            return result;
+        } catch (IOException | InterruptedException | RuntimeException e) {
+            AzureServiceFabricPlugin.sendEvent("DeployFailed",
+                    Constants.AI_RUN, buildId,
+                    "Message", e.getMessage());
+            throw e;
+        }
+    }
+
+    private boolean doPerform(AbstractBuild build, Launcher launcher, BuildListener listener)
+            throws IOException, InterruptedException {
+        String buildId = AppInsightsUtils.hash(build == null ? null : build.getUrl());
+
+        String cfgType = getConfigureType();
         if (Constants.CONFIGURE_TYPE_SELECT.equals(cfgType)) {
-            ServiceFabricCluster cluster = new ServiceFabricCluster(
-                    AzureHelper.buildClient(azureCredentialsId),
-                    resourceGroupName,
-                    serviceFabricName);
+            Azure azure = AzureHelper.buildClient(azureCredentialsId);
+            AzureServiceFabricPlugin.sendEvent("DeployAzure",
+                    Constants.AI_RUN, buildId,
+                    "Subscription", AppInsightsUtils.hash(azure.subscriptionId()),
+                    "ResourceGroup", AppInsightsUtils.hash(resourceGroupName),
+                    "Cluster", AppInsightsUtils.hash(serviceFabricName));
+
+            ServiceFabricCluster cluster = new ServiceFabricCluster(azure, resourceGroupName, serviceFabricName);
             String managementEndpoint = cluster.getManagementEndpoint();
             try {
                 URL url = new URL(managementEndpoint);
@@ -95,6 +115,10 @@ public class ServiceFabricPublisher extends Recorder {
             } catch (MalformedURLException e) {
                 throw new AbortException("Cannot determine Service Fabric management endpoint. " + e.getMessage());
             }
+        } else {
+            AzureServiceFabricPlugin.sendEvent("DeployServiceFabric",
+                    Constants.AI_RUN, buildId,
+                    "Endpoint", clusterPublicIP);
         }
 
         SFCommandBuilder commandBuilder = new SFCommandBuilder(
@@ -109,11 +133,7 @@ public class ServiceFabricPublisher extends Recorder {
 
         Shell command = new Shell(commandString);
 
-        try {
-            return command.perform(build, launcher, listener);
-        } catch (InterruptedException e) {
-            return false;
-        }
+        return command.perform(build, launcher, listener);
     }
 
     public String getConfigureType() {
