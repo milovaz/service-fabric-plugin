@@ -24,6 +24,11 @@
     <version>1.1-SNAPSHOT</version>
     <packaging>hpi</packaging>
 
+    <properties>
+        <jenkins.version>1.651.3</jenkins.version>
+        <java.level>7</java.level>
+    </properties>
+
     <name>Azure Service Fabric Plugin</name>
     <description>Plugin for deploying Azure Service Fabric applications.</description>
     <url>https://wiki.jenkins.io/display/JENKINS/Service+Fabric+Plugin</url>

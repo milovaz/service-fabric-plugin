@@ -102,17 +102,15 @@ public class ServiceFabricPublisher extends Recorder {
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-
-
         // use the parameters to construct the commands
         SFCommandBuilder commandBuilder = new SFCommandBuilder(
+                build.getWorkspace(),
                 applicationName,
                 applicationType,
                 clusterPublicIP,
                 manifestPath,
                 clientKey,
-                clientCert,
-                build.getProject().getName());
+                clientCert);
         String commandString = commandBuilder.buildCommands();
 
         Shell command = new Shell(commandString);

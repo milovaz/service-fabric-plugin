@@ -9,6 +9,7 @@
  */
 package org.jenkinsci.plugins.serviceFabric.ServiceFabricCommands;
 
+import hudson.FilePath;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -42,28 +43,26 @@ public class SFCommandBuilder {
     private static final String SF_APPLICATION_UNREGISTER =
             "sfctl application unprovision --application-type-name {appType} --application-type-version {appVersion}";
 
+    private FilePath workspace;
     private String appName;
     private String appType;
     private String clusterIP;
     private String manifestPath;
-    private String projectName;
     private String clientKey;
     private String clientCert;
 
-    public SFCommandBuilder(String applicationName,
+    public SFCommandBuilder(FilePath workspace,
+                            String applicationName,
                             String applicationType,
                             String clusterIP,
                             String manifestPath,
                             String clientKey,
-                            String clientCert,
-                            String projectName) {
-
-        // set the values
+                            String clientCert) {
+        this.workspace = workspace;
         this.appName = applicationName;
         this.appType = applicationType;
         this.clusterIP = clusterIP;
         this.manifestPath = manifestPath;
-        this.projectName = projectName;
         this.clientKey = clientKey;
         this.clientCert = clientCert;
     }
@@ -74,7 +73,7 @@ public class SFCommandBuilder {
     public String buildCommands() {
 
         String appId = getAppIdFromName(appName);
-        String targetVersion = checkTargetApplicationManifestVersion(projectName, manifestPath);
+        String targetVersion = checkTargetApplicationManifestVersion(workspace, manifestPath);
 
         // start building the command. note that since Jenkins resets its
         // location after each command,
@@ -147,10 +146,10 @@ public class SFCommandBuilder {
                 .replace("{appVersion}", appVersion).replace("{appName}", name);
     }
 
-    private String checkTargetApplicationManifestVersion(String pName, String filePath) {
+    private String checkTargetApplicationManifestVersion(FilePath ws, String filePath) {
 
         String targetVersion,
-                newFilePath = System.getenv("JENKINS_HOME") + "/workspace/" + pName + "/" + filePath;
+                newFilePath = workspace.child(filePath).getRemote();
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
         Document applicationManifest;
