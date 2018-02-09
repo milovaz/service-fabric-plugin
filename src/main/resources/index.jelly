@@ -3,5 +3,9 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin is a sample to explain how to write a Jenkins plugin.
+    Plugin for deploying
+    <a href="https://azure.microsoft.com/en-us/services/service-fabric/" title="Azure Serivce Fabric">
+        Azure Service Fabric
+    </a>
+    applications.
 </div>
