@@ -1,26 +1,46 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-    <f:entry title="Select cluster type:" field="clusterType">
-        <f:select/>
-    </f:entry>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+    <f:section title="Service Fabric Cluster Configuration">
+        <f:radioBlock name="configureType" value="select" title="Select the Service Fabric Cluster" inline="true"
+                      checked="${instance.configureType == null || instance.configureType == 'select'}">
+            <f:entry title="Azure Credentials" field="azureCredentialsId">
+                <c:select expressionAllowed="false"/>
+            </f:entry>
 
-    <!-- Fields for cluster/application information -->
-    <f:entry title="Cluster public IP: " field="clusterPublicIP">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Application name:" field="applicationName">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Application type:" field="applicationType">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Path to Application Manifest:" field="manifestPath">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Client Key (Secure only):" field="clientKey">
-        <f:textbox/>
-    </f:entry>
-    <f:entry title="Client Cert (Secure only):" field="clientCert">
-        <f:textbox/>
-    </f:entry>
+            <f:entry title="Resource Group" field="resourceGroupName">
+                <f:select/>
+            </f:entry>
+
+            <f:entry title="Service Fabric" field="serviceFabricName">
+                <f:select/>
+            </f:entry>
+        </f:radioBlock>
+
+        <f:radioBlock name="configureType" value="fill" title="Fill the Service Fabric Management Endpoint"
+                      inline="true"
+                      checked="${instance.configureType == 'fill'}">
+            <f:entry title="Cluster public IP: " field="clusterPublicIP">
+                <f:textbox/>
+            </f:entry>
+        </f:radioBlock>
+
+        <f:entry title="Client Key" field="clientKey">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Client Cert" field="clientCert">
+            <f:textbox/>
+        </f:entry>
+    </f:section>
+
+    <f:section title="Application Configuration">
+        <f:entry title="Application Name" field="applicationName">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Application Type" field="applicationType">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Path to Application Manifest" field="manifestPath">
+            <f:textbox/>
+        </f:entry>
+    </f:section>
 </j:jelly>
