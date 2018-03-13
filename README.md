@@ -1,5 +1,5 @@
-# service-fabric-jenkins-plugin
-> Jenkins Plugin for Linux Azure Service Fabric projects
+# Jenkins Plugin for Linux Azure Service Fabric
+
 ## Installation
 You can install/update this plugin in Jenkins update center (Manage Jenkins -> Manage Plugins, search Service Fabric Jenkins Plugin).
 
@@ -16,7 +16,38 @@ To manually install the plugin:
 5. Restart your Jenkins instance after installation is completed.
 
 ## Usage
+
 You can have a look at our [documentation](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cicd-your-linux-applications-with-jenkins) to understand more about building and deploying Linux Service Fabric applications using Jenkins.
+
+## Pipeline
+
+You can call the function `azureServiceFabricPublish` from your Jenkins Pipeline to deploy your application to
+Service Fabric. You can also use the the Jenkins ***Pipeline Syntax*** to generate the Pipeline snippet from
+the form UI.
+
+* Deploy with Azure resource configuration:
+
+   ```groovy
+   azureServiceFabricPublish azureCredentialsId: 'Jenkins-credentials-ID-for-Azure-service-principal',
+                             resourceGroup: 'resource-group-containing-the-service-fabric-cluster',
+                             serviceFabric: 'service-fabric-name',
+                             clientCert: 'Certificate-File-Path',
+                             clientKey: 'Key-File-Path',
+                             applicationName: 'fabric:/Your-Application-Name',
+                             applicationType: 'Your-Application-Type',
+                             manifestPath: 'Relative/path/to/ApplicationManifest.xml'
+   ```
+
+* Deploy with direct Service Fabric endpoint:
+
+   ```groovy
+   azureServiceFabricPublish managementHost: 'management.host.name.of.your.cluster',
+                             clientCert: 'Certificate-File-Path',
+                             clientKey: 'Key-File-Path',
+                             applicationName: 'fabric:/Your-Application-Name',
+                             applicationType: 'Your-Application-Type',
+                             manifestPath: 'Relative/path/to/ApplicationManifest.xml'
+   ```
 
 # Contributing
 
