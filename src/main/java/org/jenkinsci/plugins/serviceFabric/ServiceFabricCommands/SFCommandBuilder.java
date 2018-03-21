@@ -30,7 +30,7 @@ public class SFCommandBuilder {
     private String sfCopy = "sfctl application upload --path {appName} --show-progress";
     private String sfRegisterType = "sfctl application provision --application-type-build-path {appName}";
     private String sfApplicationCreate = "sfctl application create --app-name {appName} --app-type {appType} --app-version {appVersion}";
-    private String sfApplicationUpgrade = "sfctl application upgrade --app-id {appName} --app-version {appVersion} --parameters [] --mode Monitored";
+    private String sfApplicationUpgrade = "sfctl application upgrade --application-name {appName} --application-version {appVersion} --parameters {} --mode Monitored";
     private String sfApplicationRemove = "sfctl application delete --application-id {appId}";
     private String sfApplicationUnregister = "sfctl application unprovision --application-type-name {appType} --application-type-version {appVersion}";
 
@@ -111,14 +111,14 @@ public class SFCommandBuilder {
     }
 
     private String createCheckCleanCommand(String appId, String appType, String appVersion) {
-        String checkUninstall = "if [ `sfctl application info --application-id {appId} | wc -l` != 0 ]; then if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` == 1 ]; then "
+        String checkUninstall = "if [ `sfctl application info --application-id {appId} | wc -l` -ne 0 ]; then if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` -eq 1 ]; then "
                 + sfApplicationRemove + " && " + sfApplicationUnregister + "; fi; fi";
         return checkUninstall.replace("{appId}", appId).replace("{appType}", appType).replace("{appVersion}",
                 appVersion);
     }
 
     private String createUpgradeOrInstallCommand(String appId, String appName, String appType, String appVersion) {
-        String upgradeOrInstallCommand = "if [ `sfctl application info --application-id {appId} | wc -l` != 0 ]; then if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` == 0 ]; then "
+        String upgradeOrInstallCommand = "if [ `sfctl application info --application-id {appId} | wc -l` -ne 0 ]; then if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` -eq 0 ]; then "
                 + sfApplicationUpgrade + "; fi; else " + sfApplicationCreate + "; fi";
         return upgradeOrInstallCommand.replace("{appId}", appId).replace("{appType}", appType)
                 .replace("{appVersion}", appVersion).replace("{appName}", appName);
