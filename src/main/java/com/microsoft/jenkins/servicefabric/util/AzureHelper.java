@@ -12,18 +12,20 @@ import com.microsoft.azure.util.AzureCredentialUtil;
 import com.microsoft.jenkins.azurecommons.core.AzureClientFactory;
 import com.microsoft.jenkins.azurecommons.core.credentials.TokenCredentialData;
 import com.microsoft.jenkins.servicefabric.AzureServiceFabricPlugin;
+import hudson.model.Item;
 
 public final class AzureHelper {
-    public static TokenCredentialData getToken(String credentialsId) {
-        AzureBaseCredentials credentials = AzureCredentialUtil.getCredential2(credentialsId);
+    public static TokenCredentialData getToken(Item owner, String credentialsId) {
+        AzureBaseCredentials credentials = AzureCredentialUtil.getCredential(owner, credentialsId);
         if (credentials == null) {
-            throw new IllegalStateException("Cannot find credentials with ID: " + credentialsId);
+            throw new IllegalStateException(
+                    String.format("Can't find credential in scope %s with id: %s", owner, credentialsId));
         }
         return TokenCredentialData.deserialize(credentials.serializeToTokenData());
     }
 
-    public static Azure buildClient(String credentialsId) {
-        TokenCredentialData token = getToken(credentialsId);
+    public static Azure buildClient(Item owner, String credentialsId) {
+        TokenCredentialData token = getToken(owner, credentialsId);
         return buildClient(token);
     }
 
