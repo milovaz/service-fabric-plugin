@@ -134,7 +134,7 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
 
         String cfgType = getConfigureType();
         if (Constants.CONFIGURE_TYPE_SELECT.equals(cfgType)) {
-            Azure azure = AzureHelper.buildClient(azureCredentialsId);
+            Azure azure = AzureHelper.buildClient(run.getParent(), azureCredentialsId);
             AzureServiceFabricPlugin.sendEvent("DeployAzure",
                     Constants.AI_RUN, buildId,
                     "Subscription", AppInsightsUtils.hash(azure.subscriptionId()),
@@ -357,7 +357,8 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
             return model;
         }
 
-        public ListBoxModel doFillResourceGroupItems(@QueryParameter String azureCredentialsId) {
+        public ListBoxModel doFillResourceGroupItems(@AncestorInPath Item owner,
+                                                     @QueryParameter String azureCredentialsId) {
             ListBoxModel model = new ListBoxModel();
             model.add("");
 
@@ -366,7 +367,7 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
             }
 
             try {
-                Azure azure = AzureHelper.buildClient(azureCredentialsId);
+                Azure azure = AzureHelper.buildClient(owner, azureCredentialsId);
                 for (ResourceGroup resourceGroup : azure.resourceGroups().list()) {
                     model.add(resourceGroup.name());
                 }
@@ -377,7 +378,8 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
             return model;
         }
 
-        public ListBoxModel doFillServiceFabricItems(@QueryParameter String azureCredentialsId,
+        public ListBoxModel doFillServiceFabricItems(@AncestorInPath Item owner,
+                                                     @QueryParameter String azureCredentialsId,
                                                      @QueryParameter String resourceGroup) {
             ListBoxModel model = new ListBoxModel();
             model.add("");
@@ -387,7 +389,7 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
             }
 
             try {
-                Azure azure = AzureHelper.buildClient(azureCredentialsId);
+                Azure azure = AzureHelper.buildClient(owner, azureCredentialsId);
                 // TODO: Use ServiceFabric related API when the ServiceFabric Java SDK is GA
                 PagedList<GenericResource> resources =
                         azure.genericResources().listByResourceGroup(resourceGroup);
