@@ -147,7 +147,7 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
                 URL url = new URL(managementEndpoint);
                 if ("https".equalsIgnoreCase(url.getProtocol())) {
                     if (StringUtils.isBlank(clientKey) || StringUtils.isBlank(clientCert)) {
-                        throw new IllegalStateException("Certificate and Key are not specified for "
+                        throw new IllegalStateException("Certificate or Key is not specified for "
                                 + "secured Service Fabric management endpoint.");
                     }
                 }
@@ -410,11 +410,107 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
          * Check to make sure that the application name begins with "fabric:/".
          */
         public FormValidation doCheckApplicationName(@QueryParameter String value) {
-            if (value.startsWith("fabric:/")) {
+            String error = checkApplicationName(value);
+            if (StringUtils.isBlank(error)) {
                 return FormValidation.ok();
-            } else {
-                return FormValidation.error("Application name must begin with \"fabric:/\"");
             }
+            return FormValidation.error(error);
+        }
+
+        private String checkApplicationName(String name) {
+            if (name.startsWith("fabric:/")) {
+                return null;
+            } else {
+                return "Application name must begin with \"fabric:/\"";
+            }
+        }
+
+        public FormValidation doVerifyConfiguration(@AncestorInPath Item owner,
+                                                    @QueryParameter String configureType,
+                                                    @QueryParameter String azureCredentialsId,
+                                                    @QueryParameter String resourceGroup,
+                                                    @QueryParameter String serviceFabric,
+                                                    @QueryParameter String managementHost,
+                                                    @QueryParameter String clientKey,
+                                                    @QueryParameter String clientCert,
+                                                    @QueryParameter String applicationName,
+                                                    @QueryParameter String applicationType,
+                                                    @QueryParameter String manifestPath) {
+            try {
+                String errorMessage = verifyConfiguration(
+                        owner,
+                        configureType, azureCredentialsId, resourceGroup, serviceFabric,
+                        managementHost,
+                        clientKey, clientCert,
+                        applicationName, applicationType, manifestPath);
+                if (StringUtils.isBlank(errorMessage)) {
+                    return FormValidation.ok("Successfully verified the configuration.");
+                }
+                return FormValidation.error(Messages.ServiceFabricPublishStep_verificationError(errorMessage));
+            } catch (Exception ex) {
+                return FormValidation.error(Messages.ServiceFabricPublishStep_verificationError(ex.getMessage()));
+            }
+        }
+
+        private String verifyConfiguration(Item owner,
+                                           String configureType,
+                                           String azureCredentialsId,
+                                           String resourceGroup,
+                                           String serviceFabric,
+                                           String managementHost,
+                                           String clientKey,
+                                           String clientCert,
+                                           String applicationName,
+                                           String applicationType,
+                                           String manifestPath) {
+            if (Constants.CONFIGURE_TYPE_SELECT.equals(configureType)) {
+                if (StringUtils.isBlank(azureCredentialsId)) {
+                    return "Azure credential is not selected.";
+                }
+                if (StringUtils.isBlank(resourceGroup)) {
+                    return "Azure resource group is not selected.";
+                }
+                if (StringUtils.isBlank(serviceFabric)) {
+                    return "Service Fabric cluster is not selected.";
+                }
+                Azure azure = AzureHelper.buildClient(owner, azureCredentialsId);
+
+                ServiceFabricCluster cluster = new ServiceFabricCluster(azure, resourceGroup, serviceFabric);
+                String managementEndpoint = cluster.getManagementEndpoint();
+                try {
+                    URL url = new URL(managementEndpoint);
+                    if ("https".equalsIgnoreCase(url.getProtocol())) {
+                        if (StringUtils.isBlank(clientKey) || StringUtils.isBlank(clientCert)) {
+                            return "Certificate or Key is not specified for "
+                                    + "secured Service Fabric management endpoint.";
+                        }
+                    }
+                } catch (MalformedURLException e) {
+                    return "Cannot determine Service Fabric management endpoint: " + e.getMessage();
+                }
+            } else {
+                if (StringUtils.isBlank(managementHost)) {
+                    return "Service Fabric management host is not specified.";
+                }
+            }
+
+            if (StringUtils.isBlank(applicationName)) {
+                return "Application name is not specified.";
+            }
+            String result = checkApplicationName(applicationName);
+            if (StringUtils.isNotBlank(result)) {
+                return result;
+            }
+
+            if (StringUtils.isBlank(applicationType)) {
+                return "Application type is not specified.";
+            }
+
+            if (StringUtils.isBlank(manifestPath)) {
+                return "Application manifest is not specified.";
+            }
+
+            return null;
         }
     }
 }
