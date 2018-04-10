@@ -1,0 +1,12 @@
+<!--
+  ~ Copyright (c) Microsoft Corporation. All rights reserved.
+  ~ Licensed under the MIT License. See LICENSE in the project root for
+  ~ license information.
+  -->
+
+<?jelly escape-by-default="true"?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:f="/lib/form">
+    <f:property field="publishStep">
+        <st:include page="config.jelly" class="${descriptor.clazz}"/>
+    </f:property>
+</j:jelly>
