@@ -33,7 +33,8 @@ public class SFCommandBuilder {
     private static final String SF_APPLICATION_CREATE =
             "sfctl application create --app-name {appName} --app-type {appType} --app-version {appVersion}";
     private static final String SF_APPLICATION_UPGRADE =
-            "sfctl application upgrade --app-id {appName} --app-version {appVersion} --parameters [] --mode Monitored";
+            "sfctl application upgrade --application-name {appName} --application-version {appVersion} --parameters {}"
+            + " --mode Monitored";
     private static final String SF_APPLICATION_REMOVE =
             "sfctl application delete --application-id {appId}";
     private static final String SF_APPLICATION_UNREGISTER =
@@ -117,9 +118,9 @@ public class SFCommandBuilder {
 
     private String createCheckCleanCommand(String appId, String type, String appVersion) {
         String checkUninstall =
-                "if [ `sfctl application info --application-id {appId} | wc -l` != 0 ]; "
+                "if [ `sfctl application info --application-id {appId} | wc -l` -ne 0 ]; "
                         + "then "
-                        + "if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` == 1 ]; "
+                        + "if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` -eq 1 ]; "
                         + "then "
                         + SF_APPLICATION_REMOVE + " && " + SF_APPLICATION_UNREGISTER + "; "
                         + "fi; "
@@ -130,9 +131,9 @@ public class SFCommandBuilder {
 
     private String createUpgradeOrInstallCommand(String appId, String name, String type, String appVersion) {
         String upgradeOrInstallCommand =
-                "if [ `sfctl application info --application-id {appId} | wc -l` != 0 ]; "
+                "if [ `sfctl application info --application-id {appId} | wc -l` -ne 0 ]; "
                         + "then "
-                        + "if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` == 0 ]; "
+                        + "if [ `sfctl application info --application-id {appId} | grep {appVersion} | wc -l` -eq 0 ]; "
                         + "then "
                         + SF_APPLICATION_UPGRADE + "; "
                         + "fi; "
