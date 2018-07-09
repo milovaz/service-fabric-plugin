@@ -96,10 +96,9 @@ public class SFCommandBuilder {
         // Jenkins portal
         String tmpString = manifestPath.substring(0, manifestPath.lastIndexOf('/', manifestPath.length() - 1));
         String applicationPath;
-        if(tmpString.lastIndexOf('/', tmpString.length() - 1) != -1) {
+        if (tmpString.lastIndexOf('/', tmpString.length() - 1) != -1) {
             applicationPath = tmpString.substring(0, tmpString.lastIndexOf('/', tmpString.length() - 1));
-        }
-        else {
+        } else {
             applicationPath = "..";
         }
         outputCommand += "&& cd " + applicationPath;
