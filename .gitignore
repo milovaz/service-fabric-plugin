@@ -25,3 +25,8 @@ hs_err_pid*
 *.iml
 /target/
 /work
+
+.checkstyle
+.classpath
+.project
+.settings/
