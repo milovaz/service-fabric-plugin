@@ -83,4 +83,3 @@ public class ServiceFabricPublisher extends Recorder implements SimpleBuildStep 
         }
     }
 }
-

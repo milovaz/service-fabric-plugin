@@ -5,9 +5,10 @@
  */
 package org.jenkinsci.plugins.serviceFabric;
 
+import org.kohsuke.stapler.DataBoundConstructor;
+
 import com.microsoft.jenkins.servicefabric.ServiceFabricPublishStep;
 import com.microsoft.jenkins.servicefabric.util.Constants;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Moved to {@link com.microsoft.jenkins.servicefabric.ServiceFabricPublisher}.
@@ -25,6 +26,7 @@ public class ServiceFabricPublisher {
     private final String manifestPath;
     private final String clientKey;
     private final String clientCert;
+    private final String environmentType;
 
     @DataBoundConstructor
     public ServiceFabricPublisher(String name,
@@ -34,7 +36,8 @@ public class ServiceFabricPublisher {
                                   String applicationType,
                                   String manifestPath,
                                   String clientKey,
-                                  String clientCert) {
+                                  String clientCert,
+                                  String environmentType) {
         this.name = name;
         this.clusterType = clusterType;
         this.clusterPublicIP = clusterPublicIP;
@@ -43,6 +46,7 @@ public class ServiceFabricPublisher {
         this.manifestPath = manifestPath;
         this.clientKey = clientKey;
         this.clientCert = clientCert;
+        this.environmentType = environmentType;
     }
 
     /**
@@ -57,6 +61,7 @@ public class ServiceFabricPublisher {
         step.setManifestPath(manifestPath);
         step.setClientKey(clientKey);
         step.setClientCert(clientCert);
+        step.setEnvironmentType(environmentType);
         com.microsoft.jenkins.servicefabric.ServiceFabricPublisher sf =
                 new com.microsoft.jenkins.servicefabric.ServiceFabricPublisher(step);
         return sf;
@@ -93,4 +98,9 @@ public class ServiceFabricPublisher {
     public String getClientCert() {
         return clientCert;
     }
+
+	public String getEnvironmentType() {
+		return environmentType;
+	}
+
 }

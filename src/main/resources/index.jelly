@@ -4,7 +4,7 @@
 -->
 <div>
     Plugin for deploying
-    <a href="https://azure.microsoft.com/en-us/services/service-fabric/" title="Azure Serivce Fabric">
+    <a href="https://azure.microsoft.com/en-us/services/service-fabric/" title="Azure Service Fabric">
         Azure Service Fabric
     </a>
     applications.

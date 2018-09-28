@@ -9,6 +9,8 @@ import hudson.FilePath;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import com.microsoft.jenkins.servicefabric.util.Constants;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,6 +49,7 @@ public class SFCommandBuilder {
     private String manifestPath;
     private String clientKey;
     private String clientCert;
+    private String environmentType;
 
     public SFCommandBuilder(FilePath workspace,
                             String applicationName,
@@ -54,7 +57,8 @@ public class SFCommandBuilder {
                             String clusterIP,
                             String manifestPath,
                             String clientKey,
-                            String clientCert) {
+                            String clientCert,
+                            String environmentType) {
         this.workspace = workspace;
         this.appName = applicationName;
         this.appType = applicationType;
@@ -62,13 +66,13 @@ public class SFCommandBuilder {
         this.manifestPath = manifestPath;
         this.clientKey = clientKey;
         this.clientCert = clientCert;
+        this.environmentType = environmentType;
     }
 
     /**
      * Build and return the output command.
      */
     public String buildCommands() {
-
         String appId = getAppIdFromName(appName);
         String targetVersion = checkTargetApplicationManifestVersion(workspace, manifestPath);
 
@@ -130,6 +134,9 @@ public class SFCommandBuilder {
                         + SF_APPLICATION_REMOVE + " && " + SF_APPLICATION_UNREGISTER + "; "
                         + "fi; "
                         + "fi";
+        
+        appId = formatNameForEnvironmentType(environmentType, appId);
+        
         return checkUninstall.replace("{appId}", appId).replace("{appType}", type).replace("{appVersion}",
                 appVersion);
     }
@@ -144,6 +151,10 @@ public class SFCommandBuilder {
                         + "fi; "
                         + "else " + SF_APPLICATION_CREATE + "; "
                         + "fi";
+        
+        name = formatNameForEnvironmentType(environmentType, name);
+        appId = getAppIdFromName(name);
+        
         return upgradeOrInstallCommand.replace("{appId}", appId).replace("{appType}", type)
                 .replace("{appVersion}", appVersion).replace("{appName}", name);
     }
@@ -175,4 +186,21 @@ public class SFCommandBuilder {
 
     }
 
+    private String formatNameForEnvironmentType(String environmentType, String appName) {
+    	if (environmentType != null && !environmentType.isEmpty()) {
+    		environmentType = environmentType.toLowerCase();
+    		if (environmentType.matches(Constants.DEVELOP)) {
+    			appName = appName + Constants.DEVELOP_NAME_SUFFIX;
+    		} else if (environmentType.matches(Constants.STAGING)) {
+    			appName = appName + Constants.DEVELOP_NAME_SUFFIX;
+    		} else if (environmentType.matches(Constants.PRODUCTION)) {
+    			appName = appName + "";
+    		}
+    		
+    		return appName;
+    	} 
+    	
+    	return appName;
+    }
+    
 }

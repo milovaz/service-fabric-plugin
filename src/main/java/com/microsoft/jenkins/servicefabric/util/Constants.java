@@ -25,6 +25,20 @@ public final class Constants {
     public static final String AI_SERVICE_FABRIC = "ServiceFabric";
     public static final String AI_RUN = "Run";
 
+    //Environments types
+    public static final String DEVELOP = "(development|dev(elop)?)";
+    public static final String STAGING = "(stag(ing)?|stg)";
+    public static final String PRODUCTION = "prod(uction)?";
+    
+    public static final String DEVELOP_NAME_SUFFIX = "Dev";
+    public static final String STAGING_NAME_SUFFIX = "Staging";
+
+    //Version label types
+    public static final int MAJOR_VERSION = 0;
+    public static final int MINOR_VERSION = 1;
+    public static final int PATCH_VERSION = 2;
+    
+    
     private Constants() {
         // hide constructor
     }

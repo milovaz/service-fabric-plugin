@@ -6,30 +6,15 @@
 
 package com.microsoft.jenkins.servicefabric;
 
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.google.common.collect.ImmutableSet;
-import com.microsoft.azure.PagedList;
-import com.microsoft.azure.management.Azure;
-import com.microsoft.azure.management.resources.GenericResource;
-import com.microsoft.azure.management.resources.ResourceGroup;
-import com.microsoft.azure.util.AzureBaseCredentials;
-import com.microsoft.jenkins.azurecommons.telemetry.AppInsightsUtils;
-import com.microsoft.jenkins.servicefabric.command.SFCommandBuilder;
-import com.microsoft.jenkins.servicefabric.util.AzureHelper;
-import com.microsoft.jenkins.servicefabric.util.Constants;
-import hudson.AbortException;
-import hudson.EnvVars;
-import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.Item;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.security.ACL;
-import hudson.tasks.Shell;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Set;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.durabletask.BourneShellScript;
 import org.jenkinsci.plugins.durabletask.Controller;
@@ -43,13 +28,31 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Set;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.google.common.collect.ImmutableSet;
+import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.resources.GenericResource;
+import com.microsoft.azure.management.resources.ResourceGroup;
+import com.microsoft.azure.util.AzureBaseCredentials;
+import com.microsoft.jenkins.azurecommons.telemetry.AppInsightsUtils;
+import com.microsoft.jenkins.servicefabric.command.SFCommandBuilder;
+import com.microsoft.jenkins.servicefabric.util.AzureHelper;
+import com.microsoft.jenkins.servicefabric.util.Constants;
+
+import hudson.AbortException;
+import hudson.EnvVars;
+import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.security.ACL;
+import hudson.tasks.Shell;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 
 /**
  * The Step for the Service Fabric publish.
@@ -67,6 +70,7 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
     private String manifestPath;
     private String clientKey;
     private String clientCert;
+    private String environmentType;
 
     @DataBoundConstructor
     public ServiceFabricPublishStep() {
@@ -168,7 +172,8 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
                 managementHost,
                 manifestPath,
                 clientKey,
-                clientCert);
+                clientCert,
+                "dev");
         String commandString = commandBuilder.buildCommands();
 
         if (run instanceof AbstractBuild) {
@@ -327,7 +332,16 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
         this.clientCert = clientCert;
     }
 
-    @Extension // This indicates to Jenkins that this is an implementation of an extension point.
+	public String getEnvironmentType() {
+		return environmentType;
+	}
+
+	@DataBoundSetter
+	public void setEnvironmentType(String environmentType) {
+		this.environmentType = environmentType;
+	}
+
+	@Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends StepDescriptor {
         public DescriptorImpl() {
             super();
