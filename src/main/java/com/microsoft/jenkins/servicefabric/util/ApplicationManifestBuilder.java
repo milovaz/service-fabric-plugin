@@ -100,7 +100,7 @@ public class ApplicationManifestBuilder {
 		}
 	}
 
-	public void insertContainerRegistryCredentials(Authenticator authenticator) {
+	public void insertContainerRegistryCredentials(Authenticator authenticator, String isPasswordEncrypted) {
 		XPathFactory xpf = XPathFactory.newInstance();
         XPath xpath = xpf.newXPath();
 		try {
@@ -109,7 +109,7 @@ public class ApplicationManifestBuilder {
 			Element repositoryCredentialsElement = applicationManifest.createElement("RepositoryCredentials");
 			repositoryCredentialsElement.setAttribute("AccountName", authenticator.getUsername());
 			repositoryCredentialsElement.setAttribute("Password", authenticator.getPlainPassword());
-			repositoryCredentialsElement.setAttribute("PasswordEncrypted", "true");
+			repositoryCredentialsElement.setAttribute("PasswordEncrypted", isPasswordEncrypted);
 			containerHostPolicies.appendChild(repositoryCredentialsElement);
 			
 			containerHostPolicies.appendChild(repositoryCredentialsElement);
@@ -131,6 +131,9 @@ public class ApplicationManifestBuilder {
 				parametersElement.appendChild(createParameterElement(envLineParts[0].trim()));
 				environmentOverridesElement.appendChild(createEnvironmentVariableElement(envLineParts[0].trim()));
 			}
+			
+			parametersElement.appendChild(createParameterElement("PARAPHRASE"));
+			environmentOverridesElement.appendChild(createEnvironmentVariableElement("PARAPHRASE"));
 			
 			applicationManifest.getDocumentElement().appendChild(parametersElement);
 			

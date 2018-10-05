@@ -106,8 +106,8 @@ public class ServiceManifestBuilder {
         try {
         	XPathFactory xpf = XPathFactory.newInstance();
             XPath xpath = xpf.newXPath();
-			Node codePackageElement = (Node) xpath.evaluate("/ServiceManifest/CodePackage", serviceManifest, XPathConstants.NODE);
-			Element environmentVariablesElement = serviceManifest.createElement("EnvironmentVariables");
+			Node environmentVariablesElement = (Node) xpath.evaluate("/ServiceManifest/CodePackage/EnvironmentVariables", serviceManifest, XPathConstants.NODE);
+			
 			List<String> envList = authenticator.getLines();
 			
 			for(String envLine : envList) {
@@ -115,7 +115,7 @@ public class ServiceManifestBuilder {
 				environmentVariablesElement.appendChild(createEnvironmentVariableElement(envLineParts[0].trim()));
 			}
 			
-			codePackageElement.appendChild(environmentVariablesElement);
+			environmentVariablesElement.appendChild(createEnvironmentVariableElement("PARAPHRASE"));
 		} catch (XPathExpressionException e) {
 			LOGGER.log(Level.SEVERE, "Malformed ServiceManifet:" + e);
 			throw new RuntimeException(e.getMessage());

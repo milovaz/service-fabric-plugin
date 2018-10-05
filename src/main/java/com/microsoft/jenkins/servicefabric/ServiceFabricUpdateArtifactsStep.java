@@ -37,7 +37,9 @@ public class ServiceFabricUpdateArtifactsStep extends Step implements Serializab
 	private String serviceTargetVersion;
 	private String applicationTargetVersion;
 	private String credentials;
-
+	private String environmentType;
+	private String repositoryName;
+	private String passwordEncrypted;
 
 	@DataBoundConstructor
 	public ServiceFabricUpdateArtifactsStep() {
@@ -81,18 +83,44 @@ public class ServiceFabricUpdateArtifactsStep extends Step implements Serializab
             @Nonnull Launcher launcher,
             @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
+		String fileMatcher = repositoryName + "(-|_)?" + getEnvironmentMatcher(environmentType);
+		Authenticator fileAuthenticator = new Authenticator(fileMatcher, run, "file", "lookup-regex");
+		
 		ServiceManifestBuilder serviceManifestBuilder = new ServiceManifestBuilder(workspace.child(serviceManifestPath).getRemote());
 		serviceManifestBuilder.updateContainerImageVersion(serviceTargetVersion);
 		serviceManifestBuilder.updateApplicationTypeVersion(Constants.PATCH_VERSION, serviceTargetVersion);
+		if(fileAuthenticator.fileExists()) {
+			serviceManifestBuilder.insertEnvironmentVariables(fileAuthenticator);
+		}
 		serviceManifestBuilder.saveToFile();
 
 		ApplicationManifestBuilder appManifestBuilder = new ApplicationManifestBuilder(workspace.child(applicationManifestPath).getRemote());
 		appManifestBuilder.updateApplicationTypeVersion(Constants.PATCH_VERSION, applicationTargetVersion);
 		appManifestBuilder.updateServiceManifestVersion(Constants.PATCH_VERSION, applicationTargetVersion);
-		appManifestBuilder.insertContainerRegistryCredentials(new Authenticator(credentials, run));
+		appManifestBuilder.insertContainerRegistryCredentials(new Authenticator(credentials, run, "usernamePassword", null), passwordEncrypted);
+		if(fileAuthenticator.fileExists()) {
+			appManifestBuilder.insertEnvironmentVariables(fileAuthenticator);
+		}
 		appManifestBuilder.saveToFile();		
 		
 	}
+	
+    private String getEnvironmentMatcher(String environmentType) {
+    	if (environmentType != null && !environmentType.isEmpty()) {
+    		environmentType = environmentType.toLowerCase();
+    		if (environmentType.matches(Constants.DEVELOP)) {
+    			return Constants.DEVELOP;
+    		} else if (environmentType.matches(Constants.STAGING)) {
+    			return Constants.STAGING;
+    		} else if (environmentType.matches(Constants.PRODUCTION)) {
+    			return Constants.PRODUCTION;
+    		}
+    		
+    		return "";
+    	} 
+    	
+    	return "";
+    }
 	
 	public String getApplicationManifestPath() {
 		return applicationManifestPath;
@@ -139,7 +167,32 @@ public class ServiceFabricUpdateArtifactsStep extends Step implements Serializab
 		this.credentials = credentials;
 	}
 
+	public String getEnvironmentType() {
+		return environmentType;
+	}
 
+	@DataBoundSetter
+	public void setEnvironmentType(String environmentType) {
+		this.environmentType = environmentType;
+	}
+
+	public String getRepositoryName() {
+		return repositoryName;
+	}
+	
+	@DataBoundSetter
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
+	}
+
+	public String getPasswordEncrypted() {
+		return passwordEncrypted;
+	}
+
+	@DataBoundSetter
+	public void setPasswordEncrypted(String passwordEncrypted) {
+		this.passwordEncrypted = passwordEncrypted;
+	}
 
 
 	@Extension // This indicates to Jenkins that this is an implementation of an extension point.

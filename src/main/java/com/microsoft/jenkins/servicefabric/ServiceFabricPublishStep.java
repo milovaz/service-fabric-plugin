@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -36,9 +37,11 @@ import com.microsoft.azure.management.resources.GenericResource;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.util.AzureBaseCredentials;
 import com.microsoft.jenkins.azurecommons.telemetry.AppInsightsUtils;
+import com.microsoft.jenkins.servicefabric.auth.Authenticator;
 import com.microsoft.jenkins.servicefabric.command.SFCommandBuilder;
 import com.microsoft.jenkins.servicefabric.util.AzureHelper;
 import com.microsoft.jenkins.servicefabric.util.Constants;
+import com.microsoft.jenkins.servicefabric.util.EnvVariables;
 
 import hudson.AbortException;
 import hudson.EnvVars;
@@ -71,7 +74,8 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
     private String clientKey;
     private String clientCert;
     private String environmentType;
-
+    private String repositoryName;
+    
     @DataBoundConstructor
     public ServiceFabricPublishStep() {
     }
@@ -165,6 +169,11 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
                     "Endpoint", managementHost);
         }
 
+        String fileMatcher = repositoryName + "(-|_)?" + getEnvironmentMatcher(environmentType);
+        String parameters = getParameters(new Authenticator(fileMatcher, run, "file", "lookup-regex"));
+        //EnvVariables envVariables = new EnvVariables();
+        //String parameters = envVariables.generateEncryptedEnvVariables(new Authenticator(fileMatcher, run, "file", "lookup-regex"), context, run, workspace, launcher, listener);
+        
         SFCommandBuilder commandBuilder = new SFCommandBuilder(
                 workspace,
                 applicationName,
@@ -173,7 +182,8 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
                 manifestPath,
                 clientKey,
                 clientCert,
-                "dev");
+                environmentType,
+                parameters);
         String commandString = commandBuilder.buildCommands();
 
         if (run instanceof AbstractBuild) {
@@ -244,6 +254,48 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
             }
         }
         return configureType;
+    }
+    
+    private String getParameters(Authenticator authenticator) {
+		try {
+			if(!authenticator.fileExists()) {
+				return null;
+			}
+			
+			List<String> envLines = authenticator.getLines();
+			StringBuffer paramsBuff = new StringBuffer();
+	    	if(envLines != null && !envLines.isEmpty()) {
+	    		for(String envLine : envLines) {
+	    			String [] envLineParts = envLine.split("=");
+	    			if(paramsBuff.length() > 0) {
+	    				paramsBuff.append(",");
+	    			}
+	    			paramsBuff.append("\"" + envLineParts[0].trim() + "\":\"" + envLineParts[1].trim().replaceAll("\"", "") + "\"");
+	    		}
+	    	}
+	    	return "'{" + paramsBuff.toString() + "}'";
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+    }
+    
+    private String getEnvironmentMatcher(String environmentType) {
+    	if (environmentType != null && !environmentType.isEmpty()) {
+    		environmentType = environmentType.toLowerCase();
+    		if (environmentType.matches(Constants.DEVELOP)) {
+    			return Constants.DEVELOP;
+    		} else if (environmentType.matches(Constants.STAGING)) {
+    			return Constants.STAGING;
+    		} else if (environmentType.matches(Constants.PRODUCTION)) {
+    			return Constants.PRODUCTION;
+    		}
+    		
+    		return "";
+    	} 
+    	
+    	return "";
     }
 
     @DataBoundSetter
@@ -339,6 +391,15 @@ public class ServiceFabricPublishStep extends Step implements Serializable {
 	@DataBoundSetter
 	public void setEnvironmentType(String environmentType) {
 		this.environmentType = environmentType;
+	}
+
+	public String getRepositoryName() {
+		return repositoryName;
+	}
+
+	@DataBoundSetter
+	public void setRepositoryName(String repositoryName) {
+		this.repositoryName = repositoryName;
 	}
 
 	@Extension // This indicates to Jenkins that this is an implementation of an extension point.

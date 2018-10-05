@@ -33,9 +33,9 @@ public class SFCommandBuilder {
     private static final String SF_REGISTER_TYPE =
             "sfctl application provision --application-type-build-path {appName}";
     private static final String SF_APPLICATION_CREATE =
-            "sfctl application create --app-name {appName} --app-type {appType} --app-version {appVersion}";
+            "sfctl application create --app-name {appName} --app-type {appType} --app-version {appVersion} --parameters {params}";
     private static final String SF_APPLICATION_UPGRADE =
-            "sfctl application upgrade --application-id {appId} --application-version {appVersion} --parameters {}"
+            "sfctl application upgrade --application-id {appId} --application-version {appVersion} --parameters {params}"
             + " --mode Monitored";
     private static final String SF_APPLICATION_REMOVE =
             "sfctl application delete --application-id {appId}";
@@ -50,7 +50,8 @@ public class SFCommandBuilder {
     private String clientKey;
     private String clientCert;
     private String environmentType;
-
+    private String parameters;
+    
     public SFCommandBuilder(FilePath workspace,
                             String applicationName,
                             String applicationType,
@@ -58,7 +59,8 @@ public class SFCommandBuilder {
                             String manifestPath,
                             String clientKey,
                             String clientCert,
-                            String environmentType) {
+                            String environmentType,
+                            String parameters) {
         this.workspace = workspace;
         this.appName = applicationName;
         this.appType = applicationType;
@@ -67,6 +69,7 @@ public class SFCommandBuilder {
         this.clientKey = clientKey;
         this.clientCert = clientCert;
         this.environmentType = environmentType;
+        this.parameters = parameters;
     }
 
     /**
@@ -156,7 +159,7 @@ public class SFCommandBuilder {
         appId = getAppIdFromName(name);
         
         return upgradeOrInstallCommand.replace("{appId}", appId).replace("{appType}", type)
-                .replace("{appVersion}", appVersion).replace("{appName}", name);
+                .replace("{appVersion}", appVersion).replace("{appName}", name).replace("{params}", parameters != null && !parameters.isEmpty() ? parameters : "{}");
     }
 
     private String checkTargetApplicationManifestVersion(FilePath ws, String filePath) {
